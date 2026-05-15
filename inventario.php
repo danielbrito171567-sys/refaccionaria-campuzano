@@ -15,45 +15,42 @@ $resultado = mysqli_query($conexion, "SELECT * FROM productos ORDER BY id DESC")
         .sidebar { width: 250px; background: #212529; color: white; padding: 20px; }
         .main-content { flex-grow: 1; padding: 30px; }
         .nav-link { color: rgba(255,255,255,.8); margin-bottom: 10px; }
-        .nav-link:hover, .nav-link.active { color: white; background: rgba(255,255,255,.1); border-radius: 5px; }
     </style>
 </head>
 <body>
     <div class="sidebar">
         <h3 class="text-center mb-4">🔧 CAMPUZANO</h3>
-        <hr>
         <nav class="nav flex-column">
-            <a class="nav-link" href="dashboard.php"><i class="bi bi-speedometer2 me-2"></i> Inicio</a>
-            <a class="nav-link active" href="inventario.php"><i class="bi bi-box-seam me-2"></i> Inventario</a>
-            <a class="nav-link" href="ventas.php"><i class="bi bi-cart-plus me-2"></i> Nueva Venta</a>
-            <a class="nav-link" href="reportes.php"><i class="bi bi-file-earmark-bar-graph me-2"></i> Reportes</a>
-            <a class="nav-link" href="usuarios.php"><i class="bi bi-people me-2"></i> Usuarios</a>
-            <hr>
-            <a class="nav-link text-danger" href="logout.php"><i class="bi bi-box-arrow-right me-2"></i> Salir</a>
+            <a class="nav-link" href="dashboard.php">Inicio</a>
+            <a class="nav-link active" href="inventario.php">Inventario</a>
+            <a class="nav-link" href="ventas.php">Ventas</a>
+            <a class="nav-link" href="usuarios.php">Usuarios</a>
         </nav>
     </div>
 
     <div class="main-content">
         <div class="d-flex justify-content-between mb-4">
-            <h2>Inventario de Productos</h2>
-            <a href="agregar-producto.php" class="btn btn-primary">+ Agregar Nuevo</a>
+            <h2>Gestión de Inventario</h2>
+            <a href="agregar-producto.php" class="btn btn-primary">+ Nuevo Producto</a>
         </div>
-        <table class="table table-striped shadow-sm bg-white">
+        <table class="table table-hover bg-white shadow-sm">
             <thead class="table-dark">
-                <tr><th>Producto</th><th>Precio</th><th>Stock</th><th>Acciones</th></tr>
+                <tr>
+                    <th>Producto</th><th>Precio</th><th>Stock</th><th>Acciones</th>
+                </tr>
             </thead>
             <tbody>
-                <?php while($f = mysqli_fetch_assoc($resultado)): ?>
+                <?php while($f = mysqli_fetch_assoc($resultado)){ ?>
                 <tr>
-                    <td><?php echo htmlspecialchars($f['nombre']); ?></td>
+                    <td><?php echo $f['nombre']; ?></td>
                     <td>$<?php echo number_format($f['precio'], 2); ?></td>
                     <td><?php echo $f['stock']; ?></td>
                     <td>
-                        <a href="editar-producto.php?id=<?php echo $f['id']; ?>" class="btn btn-sm btn-warning">Editar</a>
-                        <a href="eliminar-producto.php?id=<?php echo $f['id']; ?>" class="btn btn-sm btn-danger" onclick="return confirm('¿Eliminar producto?')">Eliminar</a>
+                        <a href="editar-producto.php?id=<?php echo $f['id']; ?>" class="btn btn-sm btn-warning"><i class="bi bi-pencil"></i></a>
+                        <a href="eliminar-producto.php?id=<?php echo $f['id']; ?>" class="btn btn-sm btn-danger" onclick="return confirm('¿Eliminar?')"><i class="bi bi-trash"></i></a>
                     </td>
                 </tr>
-                <?php endwhile; ?>
+                <?php } ?>
             </tbody>
         </table>
     </div>
