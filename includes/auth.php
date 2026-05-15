@@ -1,10 +1,9 @@
 <?php
 session_start();
-
-// Si no existe la sesión, mandamos al login
-if(!isset($_SESSION['usuario'])){
-    session_write_close(); 
-    header("Location: index.php"); // Asegúrate de que tu login se llame index.php
+if (!isset($_SESSION['usuario'])) {
+    // Cerramos sesión por seguridad antes de redirigir
+    session_write_close();
+    header("Location: index.php");
     exit();
 }
 ?>

@@ -1,12 +1,11 @@
 <?php
-// Iniciamos la sesión para poder destruirla
+// 1. Iniciamos la sesión para poder identificarla y borrarla
 session_start();
 
-// Limpiamos todas las variables de sesión
+// 2. Limpiamos todas las variables de sesión del arreglo $_SESSION
 $_SESSION = array();
 
-// Si se desea destruir la sesión completamente, también hay que borrar la cookie de sesión.
-// Nota: Esto asegura que el navegador no guarde rastro de la sesión anterior.
+// 3. Borramos la cookie de sesión del navegador (Muy importante para la seguridad en móviles)
 if (ini_get("session.use_cookies")) {
     $params = session_get_cookie_params();
     setcookie(session_name(), '', time() - 42000,
@@ -15,10 +14,10 @@ if (ini_get("session.use_cookies")) {
     );
 }
 
-// Finalmente, destruimos la sesión en el servidor
+// 4. Destruimos la sesión en el servidor de Azure
 session_destroy();
 
-// Redirigimos al login (asegúrate de que el archivo sea login.php en minúsculas)
+// 5. Redirigimos al login
 header("Location: login.php");
 exit();
 ?>
