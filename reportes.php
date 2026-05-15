@@ -37,7 +37,7 @@ $lista_ventas = mysqli_query($conexion, "SELECT * FROM ventas ORDER BY id DESC L
     <div class="sidebar text-white p-3" style="min-width: 250px; background: #212529; min-height: 100vh;">
         <h4 class="mb-4 text-center">Refaccionaria Campuzano</h4>
         <ul class="nav flex-column">
-            <li class="nav-item mb-2"><a href="dashboard.php" class="nav-link text-white">Dashboard</a></li>
+            <li class="nav-item mb-2"><a href="dashboard.php" class="nav-link text-white">Menu</a></li>
             <li class="nav-item mb-2"><a href="inventario.php" class="nav-link text-white">Inventario</a></li>
             <li class="nav-item mb-2"><a href="ventas.php" class="nav-link text-white">Ventas</a></li>
             <li class="nav-item mb-2"><a href="reportes.php" class="nav-link text-white active">Reportes</a></li>
