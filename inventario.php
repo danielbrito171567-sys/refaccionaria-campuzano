@@ -45,11 +45,12 @@ $resultado = mysqli_query($conexion, "SELECT * FROM productos ORDER BY id DESC")
             <tbody>
                 <?php while($f = mysqli_fetch_assoc($resultado)): ?>
                 <tr>
-                    <td><?php echo $f['nombre']; ?></td>
+                    <td><?php echo htmlspecialchars($f['nombre']); ?></td>
                     <td>$<?php echo number_format($f['precio'], 2); ?></td>
                     <td><?php echo $f['stock']; ?></td>
                     <td>
                         <a href="editar-producto.php?id=<?php echo $f['id']; ?>" class="btn btn-sm btn-warning">Editar</a>
+                        <a href="eliminar-producto.php?id=<?php echo $f['id']; ?>" class="btn btn-sm btn-danger" onclick="return confirm('¿Eliminar producto?')">Eliminar</a>
                     </td>
                 </tr>
                 <?php endwhile; ?>
