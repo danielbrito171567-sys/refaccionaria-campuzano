@@ -1,131 +1,129 @@
 <?php
+// 1. Seguridad y Conexión
 include("includes/auth.php");
 include("includes/conexion.php");
 
-/* TOTAL PRODUCTOS */
+/* CONSULTAS DE ESTADÍSTICAS */
 $productos = mysqli_query($conexion, "SELECT COUNT(*) AS total FROM productos");
 $total_productos = mysqli_fetch_assoc($productos);
 
-/* TOTAL VENTAS */
 $ventas = mysqli_query($conexion, "SELECT COUNT(*) AS total FROM ventas");
 $total_ventas = mysqli_fetch_assoc($ventas);
 
-/* INGRESOS - Añadí un IFNULL para que no aparezca vacío si no hay ventas */
 $ingresos = mysqli_query($conexion, "SELECT IFNULL(SUM(total_general), 0) AS total FROM ventas");
 $total_ingresos = mysqli_fetch_assoc($ingresos);
 
-/* STOCK BAJO */
-$stock = mysqli_query($conexion, "SELECT * FROM productos WHERE stock <= 5");
+$stock_bajo = mysqli_query($conexion, "SELECT * FROM productos WHERE stock <= 5");
+$num_stock_bajo = mysqli_num_rows($stock_bajo);
 
-/* DATOS PARA GRÁFICA */
-$grafica = mysqli_query($conexion, "SELECT id, total_general FROM ventas ORDER BY id ASC LIMIT 10");
+/* DATOS PARA LA GRÁFICA (Últimas 7 ventas) */
+$grafica_query = mysqli_query($conexion, "SELECT id, total_general FROM ventas ORDER BY id DESC LIMIT 7");
+$ventas_labels = [];
+$ventas_valores = [];
 
-$ventas_ids = [];
-$ventas_totales = [];
-
-while($fila = mysqli_fetch_assoc($grafica)){
-    $ventas_ids[] = "Venta ".$fila['id'];
-    $ventas_totales[] = $fila['total_general'];
+while($v = mysqli_fetch_assoc($grafica_query)){
+    $ventas_labels[] = "#".$v['id'];
+    $ventas_valores[] = $v['total_general'];
 }
+// Invertimos para que se vea de izquierda a derecha (antiguo a nuevo)
+$ventas_labels = array_reverse($ventas_labels);
+$ventas_valores = array_reverse($ventas_valores);
+
+// 2. Cargamos el diseño
+include("includes/header.php"); 
 ?>
 
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Refaccionaria Campuzano</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="css/styles.css">
-</head>
-<body>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<div class="d-flex">
-    <div class="sidebar text-white p-3" style="min-width: 250px; background: #212529; min-height: 100vh;">
-        <h4 class="mb-4 text-center">Refaccionaria Campuzano</h4>
-        <ul class="nav flex-column">
-            <li class="nav-item mb-2"><a href="dashboard.php" class="nav-link text-white active">Menu</a></li>
-            <li class="nav-item mb-2"><a href="inventario.php" class="nav-link text-white">Inventario</a></li>
-            <li class="nav-item mb-2"><a href="ventas.php" class="nav-link text-white">Ventas</a></li>
-            <li class="nav-item mb-2"><a href="reportes.php" class="nav-link text-white">Reportes</a></li>
-            <li class="nav-item mb-2"><a href="usuarios.php" class="nav-link text-white">Usuarios</a></li>
-            <li class="nav-item mt-4"><a href="logout.php" class="nav-link text-danger">Cerrar Sesión</a></li>
-        </ul>
+<div class="py-3">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="h4 mb-0 fw-bold">Panel Principal</h2>
+        <span class="badge bg-white text-dark border shadow-sm px-3 py-2 rounded-pill">
+            <i class="bi bi-calendar3 me-2"></i><?php echo date('d/m/Y'); ?>
+        </span>
     </div>
 
-    <div class="container-fluid p-4">
-        <h2 class="mb-4">Panel de Control</h2>
-
-        <div class="row">
-            <div class="col-md-3 mb-4">
-                <div class="card shadow border-0 bg-primary text-white h-100">
-                    <div class="card-body">
-                        <h5>Total Productos</h5>
-                        <h2><?php echo $total_productos['total']; ?></h2>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3 mb-4">
-                <div class="card shadow border-0 bg-success text-white h-100">
-                    <div class="card-body">
-                        <h5>Total Ventas</h5>
-                        <h2><?php echo $total_ventas['total']; ?></h2>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3 mb-4">
-                <div class="card shadow border-0 bg-warning text-dark h-100">
-                    <div class="card-body">
-                        <h5>Ingresos</h5>
-                        <h2>$<?php echo number_format($total_ingresos['total'], 2); ?></h2>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3 mb-4">
-                <div class="card shadow border-0 bg-danger text-white h-100">
-                    <div class="card-body">
-                        <h5>Stock Bajo (<=5)</h5>
-                        <h2><?php echo mysqli_num_rows($stock); ?></h2>
-                    </div>
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm bg-primary text-white h-100">
+                <div class="card-body text-center p-3">
+                    <div class="small opacity-75 mb-1">Productos</div>
+                    <div class="h3 fw-bold mb-0"><?php echo $total_productos['total']; ?></div>
                 </div>
             </div>
         </div>
-
-        <div class="card shadow border-0 mt-4">
-            <div class="card-body text-center">
-                <h4 class="mb-4">Historial de Ventas</h4>
-                <div style="position: relative; height:40vh; width:100%">
-                    <canvas id="graficaVentas"></canvas>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm bg-success text-white h-100">
+                <div class="card-body text-center p-3">
+                    <div class="small opacity-75 mb-1">Ventas</div>
+                    <div class="h3 fw-bold mb-0"><?php echo $total_ventas['total']; ?></div>
                 </div>
             </div>
         </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm bg-warning text-dark h-100">
+                <div class="card-body text-center p-3">
+                    <div class="small opacity-75 mb-1">Ingresos</div>
+                    <div class="h4 fw-bold mb-0">$<?php echo number_format($total_ingresos['total'], 0); ?></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm bg-danger text-white h-100">
+                <div class="card-body text-center p-3">
+                    <div class="small opacity-75 mb-1">Stock Bajo</div>
+                    <div class="h3 fw-bold mb-0"><?php echo $num_stock_bajo; ?></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+            <h5 class="fw-bold mb-4 small text-uppercase text-muted">Rendimiento de Ventas ($)</h5>
+            <div style="position: relative; height: 250px;">
+                <canvas id="chartVentas"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-grid gap-2 mb-5">
+        <a href="ventas.php" class="btn btn-dark btn-lg py-3 rounded-4 shadow-sm fw-bold">
+            <i class="bi bi-plus-circle me-2"></i>Nueva Venta Rápida
+        </a>
     </div>
 </div>
 
 <script>
-const ctx = document.getElementById('graficaVentas');
+const ctx = document.getElementById('chartVentas');
 new Chart(ctx, {
-    type: 'bar',
+    type: 'line',
     data: {
-        labels: <?php echo json_encode($ventas_ids); ?>,
+        labels: <?php echo json_encode($ventas_labels); ?>,
         datasets: [{
-            label: 'Total por Venta ($)',
-            data: <?php echo json_encode($ventas_totales); ?>,
-            backgroundColor: 'rgba(13, 110, 253, 0.5)',
-            borderColor: 'rgba(13, 110, 253, 1)',
-            borderWidth: 2
+            label: 'Total Venta',
+            data: <?php echo json_encode($ventas_valores); ?>,
+            borderColor: '#0d6efd',
+            backgroundColor: 'rgba(13, 110, 253, 0.1)',
+            fill: true,
+            tension: 0.4,
+            borderWidth: 3,
+            pointRadius: 5
         }]
     },
     options: {
         responsive: true,
         maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
         scales: {
-            y: { beginAtZero: true }
+            y: { beginAtZero: true, grid: { display: false } },
+            x: { grid: { display: false } }
         }
     }
 });
 </script>
 
-</body>
-</html>
+<?php 
+// 3. Cerramos el diseño
+include("includes/footer.php"); 
+?>
